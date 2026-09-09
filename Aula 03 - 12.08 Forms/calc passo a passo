@@ -1,0 +1,147 @@
+Para criar uma Calculadora Completa em Java Swing seguindo essa mesma lógica direta e passo a passo no NetBeans, o segredo é entender que uma calculadora precisa de 3 variáveis principais na memória:
+
+primeiroNumero: guarda o valor antes da operação.
+
+operacao: guarda o operador clicado ("+", "-", "*" ou "/").
+
+limparTela: um aviso (booleano) para saber se deve apagar o visor quando o usuário clicar no próximo número.
+
+Passo 1: Criar o Formulário (JFrame Form) no NetBeans
+No seu pacote, crie um Formulário JFrame chamado TelaCalculadora.
+
+No modo Design, adicione:
+
+Um JTextField na parte superior para ser o Visor (mude o nome da variável para txtVisor, aumente a fonte e alinhe o texto à direita).
+
+Botões Numéricos (JButton): de 0 a 9 (mude os nomes para btn0, btn1, etc.).
+
+Botões de Operações (JButton): +, -, *, / (mude os nomes para btnSomar, btnSubtrair, btnMultiplicar, btnDividir).
+
+Botão Igual (JButton): = (mude o nome para btnIgual).
+
+Botões Auxiliares (JButton): C (Limpar), . (Ponto decimal).
+
+Passo 2: Declarar as Variáveis Globais na Tela
+Abra a aba Código (Source) da TelaCalculadora e declare no topo da classe:
+
+Java
+public class TelaCalculadora extends javax.swing.JFrame {
+
+    // Variáveis para controlar os cálculos
+    private double primeiroNumero = 0;
+    private String operacao = "";
+    private boolean limparTela = false;
+
+    public TelaCalculadora() {
+        initComponents();
+        txtVisor.setText("0"); // Inicia o visor zerado
+    }
+Passo 3: Método Genérico para Digitar Números
+Em vez de repetir código em todos os botões de 0 a 9, crie este método auxiliar:
+
+Java
+private void digitarNumero(String numero) {
+    // Se a tela precisar ser limpa (após clicar em +, -, etc.) ou se estiver com "0"
+    if (limparTela || txtVisor.getText().equals("0")) {
+        txtVisor.setText(numero);
+        limparTela = false;
+    } else {
+        txtVisor.setText(txtVisor.getText() + numero); // Concatena os dígitos
+    }
+}
+Agora, no modo Design, dê 2 cliques em cada botão numérico e chame o método passando o número:
+
+Java
+private void btn0ActionPerformed(java.awt.event.ActionEvent evt) { digitarNumero("0"); }
+private void btn1ActionPerformed(java.awt.event.ActionEvent evt) { digitarNumero("1"); }
+private void btn2ActionPerformed(java.awt.event.ActionEvent evt) { digitarNumero("2"); }
+// Faça isso para os botões de 3 a 9!
+Passo 4: Método para Escolher a Operação (+, -, *, /)
+Crie este método auxiliar para salvar o primeiro número e preparar o próximo cálculo:
+
+Java
+private void selecionarOperacao(String op) {
+    try {
+        primeiroNumero = Double.parseDouble(txtVisor.getText().replace(",", "."));
+        operacao = op;
+        limparTela = true; // Marca que a tela deve ser limpa ao digitar o próximo número
+    } catch (NumberFormatException e) {
+        txtVisor.setText("Erro");
+    }
+}
+Nos botões das operações no Design, dê 2 cliques e programe:
+
+Java
+private void btnSomarActionPerformed(java.awt.event.ActionEvent evt) { selecionarOperacao("+"); }
+private void btnSubtrairActionPerformed(java.awt.event.ActionEvent evt) { selecionarOperacao("-"); }
+private void btnMultiplicarActionPerformed(java.awt.event.ActionEvent evt) { selecionarOperacao("*"); }
+private void btnDividirActionPerformed(java.awt.event.ActionEvent evt) { selecionarOperacao("/"); }
+Passo 5: O Botão Igual (=) - Executar o Cálculo
+Dê 2 cliques no botão = e cole o código que faz a matemática de verdade:
+
+Java
+private void btnIgualActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    if (operacao.isEmpty()) return; // Se nenhuma operação foi clicada, ignora
+
+    try {
+        double segundoNumero = Double.parseDouble(txtVisor.getText().replace(",", "."));
+        double resultado = 0;
+
+        // Executa o cálculo com base na operação salva
+        switch (operacao) {
+            case "+":
+                resultado = primeiroNumero + segundoNumero;
+                break;
+            case "-":
+                resultado = primeiroNumero - segundoNumero;
+                break;
+            case "*":
+                resultado = primeiroNumero * segundoNumero;
+                break;
+            case "/":
+                if (segundoNumero == 0) {
+                    txtVisor.setText("Erro: Div/0");
+                    return;
+                }
+                resultado = primeiroNumero / segundoNumero;
+                break;
+        }
+
+        // Exibe o resultado ajustando casas decimais
+        if (resultado % 1 == 0) {
+            txtVisor.setText(String.valueOf((long) resultado)); // Mostra como inteiro se não tiver decimais
+        } else {
+            txtVisor.setText(String.valueOf(resultado));
+        }
+
+        operacao = ""; // Reseta a operação
+        limparTela = true;
+    } catch (Exception e) {
+        txtVisor.setText("Erro");
+    }
+}                                        
+Passo 6: Botões Auxiliares (C e .)
+Botão Limpar (C):
+Java
+private void btnLimparActionPerformed(java.awt.event.ActionEvent evt) {                                          
+    txtVisor.setText("0");
+    primeiroNumero = 0;
+    operacao = "";
+    limparTela = false;
+}                                         
+Botão Ponto Decimal (.):
+Java
+private void btnPontoActionPerformed(java.awt.event.ActionEvent evt) {                                          
+    if (limparTela) {
+        txtVisor.setText("0.");
+        limparTela = false;
+    } else if (!txtVisor.getText().contains(".")) {
+        txtVisor.setText(txtVisor.getText() + ".");
+    }
+}                                         
+Resumo do Lógica da Calculadora
+Digitar: Pega o texto atual do visor e junta com o botão clicado (1 + 2 = "12").
+
+Operação: Guarda o número do visor em primeiroNumero, salva a operacao e ativa a flag limparTela = true.
+
+Igual (=): Converte o novo texto para segundoNumero, roda o switch(operacao) e imprime no visor.
