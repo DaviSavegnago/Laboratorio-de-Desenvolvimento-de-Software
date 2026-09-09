@@ -1,0 +1,160 @@
+Abaixo está o passo a passo exato do zero no NetBeans que você deve seguir:
+
+Passo 1: Criar o Projeto no NetBeans
+Abra o NetBeans.
+
+Vá em Arquivo (File) ➔ Novo Projeto (New Project).
+
+Escolha Java com Maven (ou Java com Ant) ➔ Aplicação Java (Java Application).
+
+Dê o nome do projeto (ex: CadastroAlunos) e clique em Finalizar.
+
+Passo 2: Criar a Classe Aluno.java (O Modelo de Dados)
+No painel esquerdo, clique com o botão direito no seu pacote de código (Source Packages) ➔ Novo (New) ➔ Classe Java (Java Class).
+
+Nome da classe: Aluno.
+
+Escreva o código base dos dados do aluno:
+
+Java
+public class Aluno {
+    private String nome;
+    private String matricula;
+    private String curso;
+
+    // Construtor vazio
+    public Aluno() {}
+
+    // Construtor com parâmetros
+    public Aluno(String nome, String matricula, String curso) {
+        this.nome = nome;
+        this.matricula = matricula;
+        this.curso = curso;
+    }
+
+    // Getters e Setters
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public String getMatricula() { return matricula; }
+    public void setMatricula(String matricula) { this.matricula = matricula; }
+
+    public String getCurso() { return curso; }
+    public void setCurso(String curso) { this.curso = curso; }
+}
+Passo 3: Criar a Tela Visual (JFrame Form)
+Clique com o botão direito no seu pacote ➔ Novo (New) ➔ Formulário JFrame (JFrame Form).
+
+Nome do Formulário: TelaAluno ➔ clique em Finalizar.
+
+Desenhe a Tela no Modo "Design" (Arrastando os componentes da Paleta do NetBeans à direita):
+
+Arraste alguns JLabel para os textos de instrução (ex: "Nome:", "Matrícula:", "Curso:").
+
+Arraste os JTextField para o usuário digitar (Mude os nomes das variáveis para facilitar no código: clique com botão direito no campo ➔ Alterar nome da variável...):
+
+Mude para txtNome
+
+Mude para txtMatricula
+
+Mude para txtCurso
+
+Arraste um JButton (mude o texto dele para "Cadastrar" e o nome da variável para btnCadastrar).
+
+Arraste uma JTable para a parte inferior da tela (mude o nome da variável para tabelaAlunos).
+
+Passo 4: Escrever o Código do Form (Modo "Source / Código")
+Na aba Código / Source (no topo do editor visual do NetBeans), insira os trechos abaixo:
+
+4.1. Declarar a Lista de Alunos no topo da classe:
+Java
+public class TelaAluno extends javax.swing.JFrame {
+
+    // 1. Crie a lista que vai segurar os alunos na memória
+    private java.util.List<Aluno> listaAlunos = new java.util.ArrayList<>();
+
+    public TelaAluno() {
+        initComponents();
+        
+        // 2. Chama a leitura de arquivo ao abrir a tela
+        carregarDoArquivo();
+    }
+4.2. Dar 2 cliques no botão "Cadastrar" no modo Design:
+O NetBeans te levará automaticamente para o método btnCadastrarActionPerformed. Digite:
+
+Java
+private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {                                             
+    // A. Pega os dados digitados na tela
+    String nome = txtNome.getText();
+    String matricula = txtMatricula.getText();
+    String curso = txtCurso.getText();
+
+    // B. Cria o objeto Aluno e adiciona na Lista
+    Aluno aluno = new Aluno(nome, matricula, curso);
+    listaAlunos.add(aluno);
+
+    // C. Atualiza a Tabela e Salva no Arquivo
+    atualizarTabela();
+    salvarNoArquivo();
+
+    // D. Limpa as caixas de texto
+    txtNome.setText("");
+    txtMatricula.setText("");
+    txtCurso.setText("");
+}                                            
+4.3. Adicionar o método de atualizar a JTable:
+Cole este método no final da sua classe TelaAluno:
+
+Java
+private void atualizarTabela() {
+    javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tabelaAlunos.getModel();
+    model.setRowCount(0); // Limpa as linhas atuais da tabela
+
+    // Adiciona cada aluno da lista como uma nova linha na tabela
+    for (Aluno a : listaAlunos) {
+        model.addRow(new Object[]{ a.getMatricula(), a.getNome(), a.getCurso() });
+    }
+}
+4.4. Adicionar os métodos de Arquivo (Persistência):
+Cole também no final da sua classe TelaAluno:
+
+Java
+// SALVAR NO ARQUIVO TEXTO
+private void salvarNoArquivo() {
+    try {
+        java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter("alunos.txt"));
+        for (Aluno a : listaAlunos) {
+            writer.write(a.getNome() + ";" + a.getMatricula() + ";" + a.getCurso());
+            writer.newLine();
+        }
+        writer.close();
+    } catch (Exception e) {
+        System.out.println("Erro ao salvar arquivo: " + e.getMessage());
+    }
+}
+
+// LER DO ARQUIVO QUANDO O SISTEMA INICIAR
+private void carregarDoArquivo() {
+    try {
+        java.io.File file = new java.io.File("alunos.txt");
+        if (!file.exists()) return;
+
+        java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file));
+        String linha;
+
+        while ((linha = reader.readLine()) != null) {
+            String[] dados = linha.split(";");
+            Aluno a = new Aluno(dados[0], dados[1], dados[2]);
+            listaAlunos.add(a);
+        }
+
+        reader.close();
+        atualizarTabela(); // Preenche a tabela com o que foi lido do arquivo
+    } catch (Exception e) {
+        System.out.println("Erro ao ler arquivo: " + e.getMessage());
+    }
+}
+Passo 5: Executar o Projeto
+Clique com o botão direito no arquivo TelaAluno.java no painel de arquivos e selecione Executar Arquivo (Run File) (ou pressione Shift + F6).
+
+A tela JFrame vai abrir com todos os componentes funcionando!
